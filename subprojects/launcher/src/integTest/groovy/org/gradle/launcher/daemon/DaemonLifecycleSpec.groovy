@@ -42,7 +42,7 @@ import static org.gradle.test.fixtures.ConcurrentTestUtil.poll
  */
 class DaemonLifecycleSpec extends DaemonIntegrationSpec {
 
-    int daemonIdleTimeout = 100
+    int daemonIdleTimeout = 200
     int periodicCheckInterval = 5
     //normally, state transition timeout must be lower than the daemon timeout
     //so that the daemon does not timeout in the middle of the state verification

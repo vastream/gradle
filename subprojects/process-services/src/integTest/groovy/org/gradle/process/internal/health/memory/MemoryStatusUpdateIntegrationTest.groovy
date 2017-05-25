@@ -21,7 +21,7 @@ import spock.lang.Timeout
 
 class MemoryStatusUpdateIntegrationTest extends AbstractIntegrationSpec {
 
-    @Timeout(20)
+    @Timeout(40)
     def "can register a listener for JVM and OS memory status update events"() {
         given:
         buildFile << waitForMemoryEventsTask()

@@ -83,7 +83,7 @@ class DefaultWorkerProcessTest extends MultithreadedTestRule {
             one(acceptor).stop()
         }
 
-        expectTimesOut(1, TimeUnit.SECONDS) {
+        expectTimesOut(2, TimeUnit.SECONDS) {
             try {
                 workerProcess.start()
                 fail()

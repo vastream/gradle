@@ -28,7 +28,7 @@ import spock.lang.Unroll
 class ParallelTestExecutionIntegrationTest extends AbstractIntegrationSpec {
 
     @Rule
-    public final BlockingHttpServer blockingServer = new BlockingHttpServer()
+    public final BlockingHttpServer blockingServer = new BlockingHttpServer(150000)
 
     def setup() {
         settingsFile << 'rootProject.name = "root"'

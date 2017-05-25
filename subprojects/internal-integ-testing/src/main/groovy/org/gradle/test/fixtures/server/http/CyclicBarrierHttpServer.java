@@ -171,11 +171,11 @@ public class CyclicBarrierHttpServer extends ExternalResource {
     }
 
     public boolean waitFor() {
-        return waitFor(true, 20);
+        return waitFor(true, 50);
     }
 
     public boolean waitFor(boolean failAtTimeout) {
-        return waitFor(failAtTimeout, 20);
+        return waitFor(failAtTimeout, 50);
     }
 
     public boolean waitFor(int timeoutSeconds) {
