@@ -48,6 +48,7 @@ class SrcDistributionIntegrationSpec extends DistributionIntegrationSpec {
             inDirectory(contentsDir)
             usingExecutable('gradlew')
             withTasks('binZip')
+            withBuildJvmOpts('-Xmx1024m')
         }.run()
 
         then:

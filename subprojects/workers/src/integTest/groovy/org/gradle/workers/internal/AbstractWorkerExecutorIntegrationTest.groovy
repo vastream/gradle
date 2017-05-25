@@ -17,6 +17,7 @@
 package org.gradle.workers.internal
 
 import org.gradle.integtests.fixtures.AbstractIntegrationSpec
+import org.gradle.integtests.fixtures.executer.GradleExecuter
 import org.gradle.util.TextUtil
 import org.gradle.workers.IsolationMode
 
@@ -80,6 +81,9 @@ abstract class AbstractWorkerExecutorIntegrationTest extends AbstractIntegration
                     workerExecutor.submit(runnableClass) {
                         isolationMode = this.isolationMode
                         displayName = this.displayName
+                        if (this.isolationMode == IsolationMode.PROCESS || this.forkMode == ForkMode.ALWAYS) {
+                            forkOptions { it.maxHeapSize = '${GradleExecuter.DEFAULT_MAX_MEMORY_WORKER}' }
+                        }
                         forkOptions(additionalForkOptions)
                         classpath(additionalClasspath)
                         params = [ list.collect { it as String }, new File(outputFileDirPath), foo ]
