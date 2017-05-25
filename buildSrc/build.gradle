@@ -47,6 +47,7 @@ dependencies {
 ext.isCiServer = System.getenv().containsKey("CI")
 
 apply from: '../gradle/compile.gradle'
+apply from: '../gradle/test.gradle'
 apply from: '../gradle/dependencies.gradle'
 apply from: '../gradle/classycle.gradle'
 

@@ -83,8 +83,6 @@ test {
     forkEvery = 200
 }
 
-[compileGroovy, compileTestGroovy]*.groovyOptions*.fork(memoryInitialSize: '128M', memoryMaximumSize: '1G')
-
 task pluginsManifest(type: WriteProperties) {
     property("plugins") {
         project.pluginProjects.collect { it.archivesBaseName }.sort().join(',')

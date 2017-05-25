@@ -23,6 +23,7 @@ dependencies {
 
 // Extracted as it's also used by buildSrc
 apply from: "$rootDir/gradle/compile.gradle"
+apply from: "$rootDir/gradle/test.gradle"
 
 task classpathManifest(type: ClasspathManifest)
 
