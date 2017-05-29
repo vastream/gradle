@@ -30,7 +30,7 @@ import spock.lang.Unroll
 import static org.gradle.integtests.fixtures.StaleOutputJavaProject.JAR_TASK_NAME
 import static org.gradle.util.GFileUtils.forceDelete
 
-@Timeout(240)
+@Timeout(120)
 class StaleOutputHistoryLossIntegrationTest extends AbstractIntegrationSpec {
 
     private final ReleasedVersionDistributions releasedVersionDistributions = new ReleasedVersionDistributions()
