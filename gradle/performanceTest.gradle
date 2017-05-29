@@ -265,6 +265,9 @@ tasks.withType(ProjectGeneratorTask) {
 // this file can be used to combine the test reports of the distributed test runs into a single report in the coordinator
 tasks.withType(PerformanceTest) { task ->
     if(!(task instanceof DistributedPerformanceTest)) {
+        task.mustRunAfter tasks.withType(ProjectGeneratorTask)
+        task.mustRunAfter tasks.withType(RemoteProject)
+
         def junitXmlDir = task.reports.junitXml.destination
         def testResultsZipTask = tasks.create(name: "${task.name}ResultsZip", type: org.gradle.api.tasks.bundling.Zip) {
             from(junitXmlDir) {
