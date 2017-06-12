@@ -23,12 +23,12 @@ import org.gradle.api.Action;
 import org.gradle.api.Describable;
 import org.gradle.api.DomainObjectSet;
 import org.gradle.api.InvalidUserDataException;
-import org.gradle.api.Nullable;
 import org.gradle.api.artifacts.ArtifactCollection;
 import org.gradle.api.artifacts.ArtifactView;
 import org.gradle.api.artifacts.ConfigurablePublishArtifact;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationPublications;
+import org.gradle.api.artifacts.ConfigurationVariant;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.DependencyResolutionListener;
 import org.gradle.api.artifacts.DependencySet;
@@ -49,6 +49,7 @@ import org.gradle.api.file.FileCollection;
 import org.gradle.api.internal.CompositeDomainObjectSet;
 import org.gradle.api.internal.DefaultDomainObjectSet;
 import org.gradle.api.internal.artifacts.ConfigurationResolver;
+import org.gradle.api.internal.artifacts.ConfigurationVariantInternal;
 import org.gradle.api.internal.artifacts.DefaultDependencySet;
 import org.gradle.api.internal.artifacts.DefaultExcludeRule;
 import org.gradle.api.internal.artifacts.DefaultPublishArtifactSet;
@@ -66,6 +67,7 @@ import org.gradle.api.internal.artifacts.ivyservice.resolveengine.artifact.Selec
 import org.gradle.api.internal.artifacts.ivyservice.resolveengine.projectresult.ResolvedProjectConfiguration;
 import org.gradle.api.internal.attributes.AttributeContainerInternal;
 import org.gradle.api.internal.attributes.DefaultMutableAttributeContainer;
+import org.gradle.api.internal.attributes.ImmutableAttributeContainerWithErrorMessage;
 import org.gradle.api.internal.attributes.ImmutableAttributes;
 import org.gradle.api.internal.attributes.ImmutableAttributesFactory;
 import org.gradle.api.internal.file.AbstractFileCollection;
@@ -166,6 +168,8 @@ public class DefaultConfiguration extends AbstractFileCollection implements Conf
     private boolean dependenciesModified;
     private boolean canBeConsumed = true;
     private boolean canBeResolved = true;
+
+    private boolean canBeMutated = true;
     private AttributeContainerInternal configurationAttributes;
     private final ImmutableAttributesFactory attributesFactory;
     private final FileCollection intrinsicFiles;
@@ -461,7 +465,7 @@ public class DefaultConfiguration extends AbstractFileCollection implements Conf
         buildOperationExecutor.run(new RunnableBuildOperation() {
             @Override
             public void run(BuildOperationContext context) {
-                lockAttributes();
+                preventFromFurtherMutation();
 
                 ResolvableDependencies incoming = getIncoming();
                 performPreResolveActions(incoming);
@@ -588,9 +592,13 @@ public class DefaultConfiguration extends AbstractFileCollection implements Conf
     }
 
     @Override
-    public void lockAttributes() {
-        AttributeContainerInternal delegatee = configurationAttributes.asImmutable();
-        configurationAttributes = new AttributeContainerWithErrorMessage(delegatee);
+    public void preventFromFurtherMutation() {
+        if (canBeMutated) {
+            AttributeContainerInternal delegatee = configurationAttributes.asImmutable();
+            configurationAttributes = new ImmutableAttributeContainerWithErrorMessage(delegatee, this.displayName);
+            outgoing.preventFromFurtherMutation();
+            canBeMutated = false;
+        }
     }
 
     @Override
@@ -1255,57 +1263,4 @@ public class DefaultConfiguration extends AbstractFileCollection implements Conf
         }
     }
 
-    private class AttributeContainerWithErrorMessage implements AttributeContainerInternal {
-        private final AttributeContainerInternal delegate;
-
-        AttributeContainerWithErrorMessage(AttributeContainerInternal delegate) {
-            this.delegate = delegate;
-        }
-
-        @Override
-        public String toString() {
-            return delegate.toString();
-        }
-
-        @Override
-        public ImmutableAttributes asImmutable() {
-            return delegate.asImmutable();
-        }
-
-        @Override
-        public AttributeContainerInternal copy() {
-            return delegate.copy();
-        }
-
-        @Override
-        public Set<Attribute<?>> keySet() {
-            return delegate.keySet();
-        }
-
-        @Override
-        public <T> AttributeContainer attribute(Attribute<T> key, T value) {
-            throw new IllegalArgumentException(String.format("Cannot change attributes of %s after it has been resolved", getDisplayName()));
-        }
-
-        @Nullable
-        @Override
-        public <T> T getAttribute(Attribute<T> key) {
-            return delegate.getAttribute(key);
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return delegate.isEmpty();
-        }
-
-        @Override
-        public boolean contains(Attribute<?> key) {
-            return delegate.contains(key);
-        }
-
-        @Override
-        public AttributeContainer getAttributes() {
-            return delegate.getAttributes();
-        }
-    }
 }
