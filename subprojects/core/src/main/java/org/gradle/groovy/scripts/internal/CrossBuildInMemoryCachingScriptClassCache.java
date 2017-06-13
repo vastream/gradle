@@ -44,9 +44,13 @@ public class CrossBuildInMemoryCachingScriptClassCache {
         ScriptCacheKey key = new ScriptCacheKey(source.getClassName(), classLoader, operation.getId());
         CachedCompiledScript cached = cachedCompiledScripts.get(key);
         HashCode hash = hasher.hash(source.getResource());
-        if (cached != null) {
+        if (cached == null) {
+            System.out.println(source.getDisplayName() + " not found in in-memory cache. Cache key was: " + key);
+        } else {
             if (hash.equals(cached.hash)) {
                 return Cast.uncheckedCast(cached.compiledScript);
+            } else {
+                System.out.println(source.getDisplayName() + " found in in-memory cache, but content was different. Content hash: " + hash + ", cached hash: " + cached.hash);
             }
         }
         CompiledScript<T, M> compiledScript = delegate.compile(source, classLoader, classLoaderId, operation, scriptBaseClass, verifier);

@@ -49,4 +49,9 @@ class ScriptCacheKey {
         result = 31 * result + dslId.hashCode();
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "[className=" + className + ", classLoader=" + classLoader + ", dslId=" + dslId + "]";
+    }
 }
