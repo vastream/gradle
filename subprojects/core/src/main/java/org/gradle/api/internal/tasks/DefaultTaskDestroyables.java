@@ -16,6 +16,7 @@
 
 package org.gradle.api.internal.tasks;
 
+import org.gradle.api.Action;
 import org.gradle.api.internal.TaskInternal;
 import org.gradle.api.internal.file.FileResolver;
 import org.gradle.api.internal.file.collections.DefaultConfigurableFileCollection;
@@ -30,6 +31,7 @@ public class DefaultTaskDestroyables implements TaskDestroyables, TaskDestroyabl
     private final TaskInternal task;
     private final TaskMutator taskMutator;
     private DefaultConfigurableFileCollection destroyFiles;
+    private Action<TaskInternal> configureAction;
 
     public DefaultTaskDestroyables(FileResolver resolver, TaskInternal task, TaskMutator taskMutator) {
         this.resolver = resolver;
@@ -39,6 +41,7 @@ public class DefaultTaskDestroyables implements TaskDestroyables, TaskDestroyabl
 
     @Override
     public void files(final Object... paths) {
+        ensureConfigured();
         taskMutator.mutate("TaskDestroys.files(Object...)", new Runnable() {
             @Override
             public void run() {
@@ -49,6 +52,7 @@ public class DefaultTaskDestroyables implements TaskDestroyables, TaskDestroyabl
 
     @Override
     public void file(final Object path) {
+        ensureConfigured();
         taskMutator.mutate("TaskDestroys.file(Object...)", new Runnable() {
             @Override
             public void run() {
@@ -59,6 +63,7 @@ public class DefaultTaskDestroyables implements TaskDestroyables, TaskDestroyabl
 
     @Override
     public DefaultConfigurableFileCollection getFiles() {
+        ensureConfigured();
         if (destroyFiles == null) {
             destroyFiles = new DefaultConfigurableFileCollection(task + " destroy files", resolver, null);
 
@@ -68,9 +73,22 @@ public class DefaultTaskDestroyables implements TaskDestroyables, TaskDestroyabl
 
     @Override
     public Collection<File> getFilesReadOnly() {
+        ensureConfigured();
         if (destroyFiles != null) {
             return destroyFiles.getFiles();
         }
         return Collections.emptySet();
     }
+
+    @Override
+    public void whenPropertiesRequired(Action<TaskInternal> action) {
+        this.configureAction = action;
+    }
+
+    private void ensureConfigured() {
+        if (configureAction != null) {
+            configureAction.execute(task);
+        }
+    }
+
 }

@@ -30,6 +30,7 @@ import org.gradle.util.TestUtil
 import static org.gradle.api.tasks.TaskDependencyMatchers.dependsOn
 import static org.hamcrest.Matchers.hasItems
 
+//TODO this class is a terrible hack. It should be replaced with an integration test.
 class EarPluginTest extends AbstractProjectBuilderSpec {
     private static final String TEST_APP_XML = """<?xml version="1.0" encoding="UTF-8"?>
 <application xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:application="http://java.sun.com/xml/ns/javaee/application_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/application_5.xsd" version="5">
@@ -324,6 +325,7 @@ class EarPluginTest extends AbstractProjectBuilderSpec {
 
     private static void execute(Task task) {
         for (Task dep : task.taskDependencies.getDependencies(task)) {
+            discoverOutputs(dep)
             for (Action action : dep.actions) {
                 action.execute(dep)
             }
@@ -331,6 +333,10 @@ class EarPluginTest extends AbstractProjectBuilderSpec {
         for (Action action : task.actions) {
             action.execute(task)
         }
+    }
+
+    private static Set<File> discoverOutputs(Task dep) {
+        dep.getOutputs().getFiles().getFiles()
     }
 
     File inEar(path) {

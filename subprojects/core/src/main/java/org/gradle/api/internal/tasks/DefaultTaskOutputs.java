@@ -22,6 +22,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import groovy.lang.Closure;
+import org.gradle.api.Action;
 import org.gradle.api.Describable;
 import org.gradle.api.Task;
 import org.gradle.api.file.FileCollection;
@@ -61,6 +62,7 @@ public class DefaultTaskOutputs implements TaskOutputsInternal {
     private final FileResolver resolver;
     private final TaskInternal task;
     private final TaskMutator taskMutator;
+    private Action<TaskInternal> configureAction;
 
     public DefaultTaskOutputs(FileResolver resolver, final TaskInternal task, TaskMutator taskMutator) {
         this.resolver = resolver;
@@ -170,11 +172,13 @@ public class DefaultTaskOutputs implements TaskOutputsInternal {
 
     @Override
     public boolean getHasOutput() {
+        ensureConfigured();
         return hasDeclaredOutputs() || !upToDateSpec.isEmpty();
     }
 
     @Override
     public boolean hasDeclaredOutputs() {
+        ensureConfigured();
         return !filePropertiesInternal.isEmpty();
     }
 
@@ -185,6 +189,7 @@ public class DefaultTaskOutputs implements TaskOutputsInternal {
 
     @Override
     public ImmutableSortedSet<TaskOutputFilePropertySpec> getFileProperties() {
+        ensureConfigured();
         if (fileProperties == null) {
             TaskPropertyUtils.ensurePropertiesHaveNames(filePropertiesInternal);
             Iterator<TaskOutputFilePropertySpec> flattenedProperties = Iterators.concat(Iterables.transform(filePropertiesInternal, new Function<TaskPropertySpec, Iterator<? extends TaskOutputFilePropertySpec>>() {
@@ -204,6 +209,7 @@ public class DefaultTaskOutputs implements TaskOutputsInternal {
 
     @Override
     public TaskOutputFilePropertyBuilder file(final Object path) {
+        ensureConfigured();
         return taskMutator.mutate("TaskOutputs.file(Object)", new Callable<TaskOutputFilePropertyBuilder>() {
             @Override
             public TaskOutputFilePropertyBuilder call() throws Exception {
@@ -214,6 +220,7 @@ public class DefaultTaskOutputs implements TaskOutputsInternal {
 
     @Override
     public TaskOutputFilePropertyBuilder dir(final Object path) {
+        ensureConfigured();
         return taskMutator.mutate("TaskOutputs.dir(Object)", new Callable<TaskOutputFilePropertyBuilder>() {
             @Override
             public TaskOutputFilePropertyBuilder call() throws Exception {
@@ -224,6 +231,7 @@ public class DefaultTaskOutputs implements TaskOutputsInternal {
 
     @Override
     public TaskOutputFilePropertyBuilder files(final Object... paths) {
+        ensureConfigured();
         return taskMutator.mutate("TaskOutputs.files(Object...)", new Callable<TaskOutputFilePropertyBuilder>() {
             @Override
             public TaskOutputFilePropertyBuilder call() throws Exception {
@@ -234,6 +242,7 @@ public class DefaultTaskOutputs implements TaskOutputsInternal {
 
     @Override
     public TaskOutputFilePropertyBuilder dirs(final Object... paths) {
+        ensureConfigured();
         return taskMutator.mutate("TaskOutputs.dirs(Object...)", new Callable<TaskOutputFilePropertyBuilder>() {
             @Override
             public TaskOutputFilePropertyBuilder call() throws Exception {
@@ -253,6 +262,17 @@ public class DefaultTaskOutputs implements TaskOutputsInternal {
             throw new IllegalStateException("Task history is currently not available for this task.");
         }
         return history.getOutputFiles();
+    }
+
+    @Override
+    public void whenPropertiesRequired(Action<TaskInternal> action) {
+        this.configureAction = action;
+    }
+
+    private void ensureConfigured() {
+        if (configureAction != null) {
+            configureAction.execute(task);
+        }
     }
 
     @Override

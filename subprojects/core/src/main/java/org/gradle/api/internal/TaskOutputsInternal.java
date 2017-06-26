@@ -22,7 +22,7 @@ import org.gradle.api.internal.tasks.TaskOutputFilePropertySpec;
 import org.gradle.api.specs.Spec;
 import org.gradle.api.tasks.TaskOutputs;
 
-public interface TaskOutputsInternal extends TaskOutputs {
+public interface TaskOutputsInternal extends TaskOutputs, WithAnnotatedProperties {
 
     Spec<? super TaskInternal> getUpToDateSpec();
 

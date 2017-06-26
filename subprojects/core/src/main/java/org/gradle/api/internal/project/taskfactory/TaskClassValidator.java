@@ -44,9 +44,19 @@ public class TaskClassValidator implements TaskValidator, Action<Task> {
 
     public void addInputsAndOutputs(final TaskInternal task) {
         task.addValidator(this);
-        for (TaskPropertyInfo property : annotatedProperties) {
-            property.getConfigureAction().update(task, new FutureValue(property, task));
-        }
+        task.whenPropertiesRequired(new Action<TaskInternal>() {
+            boolean ran;
+            @Override
+            public void execute(TaskInternal task) {
+                if (ran) {
+                    return;
+                }
+                ran = true;
+                for (TaskPropertyInfo property : annotatedProperties) {
+                    property.getConfigureAction().update(task, new FutureValue(property, task));
+                }
+            }
+        });
     }
 
     private static class FutureValue implements Callable<Object> {

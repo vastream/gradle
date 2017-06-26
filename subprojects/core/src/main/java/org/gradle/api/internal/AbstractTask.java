@@ -42,6 +42,7 @@ import org.gradle.api.internal.tasks.DefaultTaskInputs;
 import org.gradle.api.internal.tasks.DefaultTaskOutputs;
 import org.gradle.api.internal.tasks.TaskContainerInternal;
 import org.gradle.api.internal.tasks.TaskDependencyInternal;
+import org.gradle.api.internal.tasks.TaskDestroyablesInternal;
 import org.gradle.api.internal.tasks.TaskExecuter;
 import org.gradle.api.internal.tasks.TaskExecutionContext;
 import org.gradle.api.internal.tasks.TaskMutator;
@@ -129,7 +130,7 @@ public abstract class AbstractTask implements TaskInternal, DynamicObjectAware {
 
     private final TaskInputsInternal taskInputs;
     private final TaskOutputsInternal taskOutputs;
-    private final TaskDestroyables taskDestroyables;
+    private final TaskDestroyablesInternal taskDestroyables;
     private final Class<? extends Task> publicType;
     private LoggingManagerInternal loggingManager;
 
@@ -949,5 +950,12 @@ public abstract class AbstractTask implements TaskInternal, DynamicObjectAware {
     @Incubating
     protected RegularFileVar newInputFile() {
         return getServices().get(TaskFileVarFactory.class).newInputFile(this);
+    }
+
+    @Override
+    public void whenPropertiesRequired(Action<TaskInternal> action) {
+        taskInputs.whenPropertiesRequired(action);
+        taskOutputs.whenPropertiesRequired(action);
+        taskDestroyables.whenPropertiesRequired(action);
     }
 }

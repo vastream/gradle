@@ -14,20 +14,10 @@
  * limitations under the License.
  */
 
-package org.gradle.api.internal.tasks;
+package org.gradle.api.internal;
 
-import org.gradle.api.internal.WithAnnotatedProperties;
-import org.gradle.api.tasks.TaskDestroyables;
+import org.gradle.api.Action;
 
-import java.io.File;
-import java.util.Collection;
-
-/**
- * Note: this is currently not visible on {@link org.gradle.api.internal.TaskInternal} to avoid it leaking onto {@link org.gradle.api.internal.AbstractTask} and so on to the public API.
- */
-public interface TaskDestroyablesInternal extends TaskDestroyables, WithAnnotatedProperties {
-    /**
-     * Returns the files that this task will destroy.
-     */
-    Collection<File> getFilesReadOnly();
+public interface WithAnnotatedProperties {
+    void whenPropertiesRequired(Action<TaskInternal> action);
 }
