@@ -32,12 +32,10 @@ import java.util.concurrent.Callable;
 public class TaskClassValidator implements TaskValidator, Action<Task> {
     private final ImmutableSortedSet<TaskPropertyInfo> annotatedProperties;
     private final ImmutableList<TaskClassValidationMessage> validationMessages;
-    private final boolean cacheable;
 
-    public TaskClassValidator(Set<TaskPropertyInfo> annotatedProperties, List<TaskClassValidationMessage> validationMessages, boolean cacheable) {
+    public TaskClassValidator(Set<TaskPropertyInfo> annotatedProperties, List<TaskClassValidationMessage> validationMessages) {
         this.annotatedProperties = ImmutableSortedSet.copyOf(annotatedProperties);
         this.validationMessages = ImmutableList.copyOf(validationMessages);
-        this.cacheable = cacheable;
     }
 
     @Override
@@ -95,9 +93,5 @@ public class TaskClassValidator implements TaskValidator, Action<Task> {
 
     public ImmutableList<TaskClassValidationMessage> getValidationMessages() {
         return validationMessages;
-    }
-
-    public boolean isCacheable() {
-        return cacheable;
     }
 }

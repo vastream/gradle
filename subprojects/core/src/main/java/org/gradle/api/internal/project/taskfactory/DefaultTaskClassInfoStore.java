@@ -26,6 +26,7 @@ import org.gradle.api.internal.changedetection.TaskArtifactState;
 import org.gradle.api.internal.tasks.ClassLoaderAwareTaskAction;
 import org.gradle.api.internal.tasks.ContextAwareTaskAction;
 import org.gradle.api.internal.tasks.TaskExecutionContext;
+import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs;
 import org.gradle.internal.Factory;
@@ -47,6 +48,7 @@ public class DefaultTaskClassInfoStore implements TaskClassInfoStore {
             public TaskClassInfo load(Class<? extends Task> type) throws Exception {
                 TaskClassInfo taskClassInfo = new TaskClassInfo();
                 findTaskActions(type, taskClassInfo);
+                taskClassInfo.setCacheable(isCacheable(type));
 
                 TaskClassValidator validator = validatorExtractor.extractValidator(type);
                 taskClassInfo.setValidator(validator);
@@ -104,6 +106,10 @@ public class DefaultTaskClassInfoStore implements TaskClassInfoStore {
         }
         taskClassInfo.getTaskActions().add(createActionFactory(type, method, parameterTypes));
         processedMethods.add(method.getName());
+    }
+
+    private boolean isCacheable(Class<? extends Task> type) {
+        return type.isAnnotationPresent(CacheableTask.class);
     }
 
     private Factory<Action<Task>> createActionFactory(final Class<? extends Task> type, final Method method, final Class<?>[] parameterTypes) {

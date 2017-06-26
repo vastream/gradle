@@ -124,19 +124,19 @@ public class DefaultTaskClassValidatorExtractor implements TaskClassValidatorExt
 
     @Override
     public TaskClassValidator extractValidator(Class<? extends Task> type) {
-        boolean cacheable = type.isAnnotationPresent(CacheableTask.class);
         ImmutableSortedSet.Builder<TaskPropertyInfo> annotatedPropertiesBuilder = ImmutableSortedSet.naturalOrder();
         ImmutableList.Builder<TaskClassValidationMessage> validationMessages = ImmutableList.builder();
         Queue<TypeEntry> queue = new ArrayDeque<TypeEntry>();
         queue.add(new TypeEntry(null, type));
         while (!queue.isEmpty()) {
             TypeEntry entry = queue.remove();
-            parseProperties(entry.parent, entry.type, annotatedPropertiesBuilder, validationMessages, cacheable, queue);
+            parseProperties(entry.parent, entry.type, annotatedPropertiesBuilder, validationMessages, queue);
         }
-        return new TaskClassValidator(annotatedPropertiesBuilder.build(), validationMessages.build(), cacheable);
+        return new TaskClassValidator(annotatedPropertiesBuilder.build(), validationMessages.build());
     }
 
-    private <T> void parseProperties(final TaskPropertyInfo parent, Class<T> type, ImmutableSet.Builder<TaskPropertyInfo> annotatedProperties, final ImmutableCollection.Builder<TaskClassValidationMessage> validationMessages, final boolean cacheable, Queue<TypeEntry> queue) {
+    private <T> void parseProperties(final TaskPropertyInfo parent, Class<T> type, ImmutableSet.Builder<TaskPropertyInfo> annotatedProperties, final ImmutableCollection.Builder<TaskClassValidationMessage> validationMessages, Queue<TypeEntry> queue) {
+        final boolean cacheable = type.isAnnotationPresent(CacheableTask.class);
         final Set<Class<? extends Annotation>> propertyTypeAnnotations = annotationHandlers.keySet();
         final Map<String, DefaultTaskPropertyActionContext> propertyContexts = Maps.newLinkedHashMap();
         Types.walkTypeHierarchy(type, IGNORED_SUPER_CLASSES, new Types.TypeVisitor<T>() {
