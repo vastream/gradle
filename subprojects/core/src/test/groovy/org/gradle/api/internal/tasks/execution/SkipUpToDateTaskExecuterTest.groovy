@@ -68,7 +68,6 @@ class SkipUpToDateTaskExecuterTest extends Specification {
 
         then:
         1 * delegate.execute(task, taskState, taskContext)
-        _ * taskState.getFailure() >> null
 
         then:
         1 * taskArtifactState.afterTask()
@@ -89,7 +88,9 @@ class SkipUpToDateTaskExecuterTest extends Specification {
 
         then:
         1 * delegate.execute(task, taskState, taskContext)
-        1 * taskState.getFailure() >> new RuntimeException()
+
+        then:
+        1 * taskArtifactState.afterTask()
         0 * _
     }
 }

@@ -33,15 +33,20 @@ class FailingIncrementalTasksIntegrationTest extends AbstractIntegrationSpec {
             }
         """
 
-        when:
-        run "foo"
-        file("out.txt") << "force rerun"
-        def failure1 = runAndFail "foo"
-        def failure2 = runAndFail "foo"
+        expect:
+        succeeds "foo"
 
+        when:
+        file("out.txt") << "force rerun"
+        fails"foo"
         then:
-        failure1.assertHasCause("Boo!")
-        failure2.assertHasCause("Boo!")
+        failureHasCause "Boo!"
+
+        when:
+        fails "foo", "--info"
+        then:
+        failureHasCause "Boo!"
+        output.contains "Task has failed previously."
         //this exposes an issue we used to have with in-memory cache.
     }
 }

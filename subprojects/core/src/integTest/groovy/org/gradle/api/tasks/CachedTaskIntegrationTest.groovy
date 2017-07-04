@@ -100,7 +100,16 @@ class CachedTaskIntegrationTest extends AbstractIntegrationSpec implements Direc
 
         expect:
         fails "foo", "-Pfail"
+
+        when:
         withBuildCache().succeeds "foo"
+        then:
+        executedTasks == [":foo"]
+
+        when:
+        withBuildCache().succeeds "foo"
+        then:
+        skippedTasks as List == [":foo"]
     }
 
     def defineCacheableTask() {

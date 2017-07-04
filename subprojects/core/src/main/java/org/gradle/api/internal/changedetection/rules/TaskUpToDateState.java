@@ -49,6 +49,7 @@ public class TaskUpToDateState {
         TaskExecution lastExecution = history.getPreviousExecution();
         InputNormalizationStrategy inputNormalizationStrategy = ((InputNormalizationHandlerInternal) task.getProject().getNormalization()).buildFinalStrategy();
 
+        TaskStateChanges successState = new SuccessTaskStateChanges(lastExecution, thisExecution, task);
         TaskStateChanges noHistoryState = new NoHistoryTaskStateChanges(lastExecution);
         TaskStateChanges taskTypeState = new TaskTypeTaskStateChanges(lastExecution, thisExecution, task.getPath(), task.getClass(), task.getTaskActions(), classLoaderHierarchyHasher);
         TaskStateChanges inputPropertiesState = new InputPropertiesTaskStateChanges(lastExecution, thisExecution, task, valueSnapshotter);
@@ -66,8 +67,8 @@ public class TaskUpToDateState {
         this.discoveredInputsListener = discoveredChanges;
         TaskStateChanges discoveredInputFilesChanges = caching(discoveredChanges);
 
-        this.allTaskChanges = new ErrorHandlingTaskStateChanges(task, new SummaryTaskStateChanges(MAX_OUT_OF_DATE_MESSAGES, noHistoryState, taskTypeState, inputPropertiesState, outputFileChanges, inputFileChanges, discoveredInputFilesChanges));
-        this.rebuildChanges = new ErrorHandlingTaskStateChanges(task, new SummaryTaskStateChanges(1, noHistoryState, taskTypeState, inputPropertiesState, outputFileChanges));
+        this.allTaskChanges = new ErrorHandlingTaskStateChanges(task, new SummaryTaskStateChanges(MAX_OUT_OF_DATE_MESSAGES, successState, noHistoryState, taskTypeState, inputPropertiesState, outputFileChanges, inputFileChanges, discoveredInputFilesChanges));
+        this.rebuildChanges = new ErrorHandlingTaskStateChanges(task, new SummaryTaskStateChanges(1, successState, noHistoryState, taskTypeState, inputPropertiesState, outputFileChanges));
     }
 
     private TaskStateChanges caching(TaskStateChanges wrapped) {
