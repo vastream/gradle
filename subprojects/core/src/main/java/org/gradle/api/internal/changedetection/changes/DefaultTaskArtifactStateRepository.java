@@ -83,6 +83,7 @@ public class DefaultTaskArtifactStateRepository implements TaskArtifactStateRepo
             this.history = history;
         }
 
+        @Override
         public boolean isUpToDate(Collection<String> messages) {
             upToDate = true;
             for (TaskStateChange stateChange : getStates().getAllTaskChanges()) {
@@ -92,6 +93,7 @@ public class DefaultTaskArtifactStateRepository implements TaskArtifactStateRepo
             return upToDate;
         }
 
+        @Override
         public IncrementalTaskInputs getInputChanges() {
             assert !upToDate : "Should not be here if the task is up-to-date";
 
@@ -126,6 +128,7 @@ public class DefaultTaskArtifactStateRepository implements TaskArtifactStateRepo
             return cacheKeyCalculator.calculate(history.getCurrentExecution());
         }
 
+        @Override
         public FileCollection getOutputFiles() {
             TaskExecution lastExecution = history.getPreviousExecution();
             if (lastExecution != null && lastExecution.getOutputFilesSnapshot() != null) {
@@ -139,6 +142,7 @@ public class DefaultTaskArtifactStateRepository implements TaskArtifactStateRepo
             }
         }
 
+        @Override
         public TaskExecutionHistory getExecutionHistory() {
             return this;
         }
@@ -154,9 +158,11 @@ public class DefaultTaskArtifactStateRepository implements TaskArtifactStateRepo
             }
         }
 
+        @Override
         public void beforeTask() {
         }
 
+        @Override
         public void afterTask() {
             if (upToDate) {
                 return;
@@ -167,9 +173,6 @@ public class DefaultTaskArtifactStateRepository implements TaskArtifactStateRepo
             }
             getStates().getAllTaskChanges().snapshotAfterTask();
             history.update();
-        }
-
-        public void finished() {
         }
 
         private TaskUpToDateState getStates() {
